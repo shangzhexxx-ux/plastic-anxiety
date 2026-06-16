@@ -1,0 +1,40 @@
+@media (max-width: 768px) {
+  html {
+    height: auto;
+    overflow-y: auto;
+  }
+
+  body.lab-body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .lab-body .lab-page,
+  .lab-body .studio-section.lab-only,
+  .lab-body .studio-shell,
+  .lab-body .board-zone,
+  .lab-body .board-and-layers {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .lab-body .canvas-wrap {
+    overflow: visible;
+    touch-action: pan-y;
+  }
+
+  .lab-body #collageCanvas {
+    touch-action: pan-y;
+  }
+
+  .lab-body #collageCanvas.brush-cursor,
+  .lab-body #collageCanvas.frame-cursor,
+  .lab-body #collageCanvas.cut-cursor {
+    touch-action: none;
+  }
+}

@@ -2114,6 +2114,35 @@ footer {
   .lab-body .material-panel.active-tab[data-tab-mode="layers"] [data-tab-scope="layers"] {
     display: block;
   }
+
+  html {
+    height: auto;
+    overflow-y: auto;
+  }
+
+  body.lab-body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .lab-body .canvas-wrap {
+    overflow: visible;
+    touch-action: pan-y;
+  }
+
+  .lab-body #collageCanvas {
+    touch-action: pan-y;
+  }
+
+  .lab-body #collageCanvas.brush-cursor,
+  .lab-body #collageCanvas.frame-cursor,
+  .lab-body #collageCanvas.cut-cursor {
+    touch-action: none;
+  }
 }
 
 @media (max-width: 480px) {
