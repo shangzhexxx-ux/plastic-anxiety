@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Paper Texture 01",
+    "file": "1e65461f0022ce0adc0569a1c0baea6a.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Paper Texture 02",
+    "file": "2dcd80efbf41e9efe6b524798b5e49a9.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Paper Texture 03",
+    "file": "625fd8839b65dcbc54f9ba6adf9e07ab.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Paper Texture 04",
+    "file": "7f88328e4a6897b4873fe53752ffa2d2.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Paper Texture 05",
+    "file": "85905a2e65655899914a7b771bf21d69.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Paper Texture 06",
+    "file": "a7cc647f887180ecc67d9cf4865662fe.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Paper Texture 07",
+    "file": "c9fd16aa78a45938def5aab45e0867fd.jpg",
+    "tags": ["paper", "background", "texture"]
+  },
+  {
+    "name": "Grey Packaging Sheet",
+    "file": "grey-packaging-sheet.svg",
+    "tags": ["paper", "packaging", "background"]
+  }
+]

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plastic Anxiety | Collage Lab</title>
+    <link rel="stylesheet" href="styles.css?v=mobile-tabs3-76">
+  </head>
+  <body class="lab-body">
+    <main class="lab-page">
+      <section class="studio-section lab-only" id="collage-lab" aria-label="Collage Lab board">
+        <div class="top-toolbar" aria-label="Board tools">
+          <a class="back-home" href="index.html">Back to Home</a>
+          <div class="toolbar-center">
+            <button class="tool-button active" type="button" data-tool="select" title="Select">Select</button>
+            <button id="addText" type="button" title="Add text fragment">Text</button>
+            <button class="tool-button" type="button" data-tool="brush" title="Brush">Brush</button>
+            <button class="tool-button" type="button" data-tool="frame" title="Draw frame">Frame</button>
+            <button id="snapshotState" type="button" title="Save snapshot">Snapshot</button>
+            <button id="undoAction" type="button" title="Undo">Undo</button>
+            <button id="redoAction" type="button" title="Redo">Redo</button>
+          </div>
+          <button id="exportPng" class="export" type="button">Export PNG</button>
+        </div>
+
+        <div class="panel-tabs" role="tablist" aria-label="Side panels">
+          <button class="panel-tab active" type="button" role="tab" data-tab="material" aria-selected="true">Material Library</button>
+          <button class="panel-tab" type="button" role="tab" data-tab="style" aria-selected="false">Style</button>
+          <button class="panel-tab" type="button" role="tab" data-tab="layers" aria-selected="false">Layers</button>
+        </div>
+
+        <div class="studio-shell">
+          <aside class="panel material-panel active-tab" aria-label="Material source panel" data-side-panel="material" data-tab-mode="material">
+            <div class="panel-title">
+              <span>Material Library</span>
+              <small id="libraryPanelSummary">labels / papers / decorations</small>
+              <button class="panel-toggle" type="button" aria-label="Toggle material panel" data-panel="material">&or;</button>
+            </div>
+            <div class="panel-body">
+              <div class="material-actions" data-tab-scope="material">
+                <button id="openLibrary" class="open-library" type="button">Open Material Library</button>
+                <div class="tool-row">
+                  <label class="file-button add-material" for="libraryUpload">Add Material</label>
+                  <input id="libraryUpload" type="file" accept="image/*" multiple>
+                </div>
+              </div>
+              <canvas id="materialCanvas" width="520" height="650" hidden aria-hidden="true"></canvas>
+              <input id="imageUpload" type="file" accept="image/*" hidden>
+
+              <div class="panel-title tight" data-tab-scope="layers">
+                <span>Layers</span>
+                <small>top objects appear first</small>
+              </div>
+              <div id="layerList" class="layer-list" aria-label="Canvas layers" data-tab-scope="layers"></div>
+            </div>
+          </aside>
+
+          <section class="board-zone" aria-label="Collage board workspace">
+            <div class="board-and-layers">
+              <div class="canvas-wrap">
+                <canvas id="collageCanvas" width="1080" height="1440" aria-label="Plastic Anxiety collage board"></canvas>
+              </div>
+
+              <aside class="panel style-panel" aria-label="Style panel" data-side-panel="style">
+                <div class="panel-title">
+                  <span>Style</span>
+                  <small id="styleContext">select</small>
+                  <button class="panel-toggle" type="button" aria-label="Toggle style panel" data-panel="style">&or;</button>
+                </div>
+                <div class="panel-body">
+
+                <div class="style-group" data-style-panel="select">
+                  <div class="selected-style" data-selected-style="empty">
+                    <p class="hint">Select a text fragment, image, brush stroke, or frame to edit its properties.</p>
+                  </div>
+
+                  <div class="selected-style" data-selected-style="text">
+                    <label for="phraseInput">Text</label>
+                    <input id="phraseInput" type="text" value="microplastic desire">
+                    <label for="textColor">Text color</label>
+                    <input id="textColor" type="color" value="#111111">
+                    <label for="textFillColor">Text fill</label>
+                    <div class="color-choice">
+                      <input id="textFillColor" type="color" value="#fffefa">
+                      <button id="noFillSelected" class="none-swatch" type="button" aria-label="No fill" aria-pressed="false" title="No fill"></button>
+                    </div>
+                  </div>
+
+                  <div class="selected-style" data-selected-style="image">
+                    <p class="hint">Crop or free cut the selected image directly on the board.</p>
+                    <div class="tool-row selected-tools">
+                      <button id="cropImage" type="button" title="Crop selected image">Crop</button>
+                      <button id="freeCutImage" type="button" title="Draw a free cut path">Free Cut</button>
+                    </div>
+                  </div>
+
+                  <div class="selected-style" data-selected-style="crop">
+                    <p class="hint">Drag the dashed crop frame. Drag a corner to resize it.</p>
+                    <div class="tool-row selected-tools">
+                      <button id="applyCropImage" type="button" title="Apply crop">Apply Crop</button>
+                      <button id="cancelCropImage" type="button" title="Cancel crop">Cancel</button>
+                    </div>
+                  </div>
+
+                  <div class="selected-style" data-selected-style="stroke">
+                    <label for="selectedStrokeColor">Stroke color</label>
+                    <div class="color-choice">
+                      <input id="selectedStrokeColor" type="color" value="#111111">
+                      <button id="noStrokeSelected" class="none-swatch" type="button" aria-label="No stroke" aria-pressed="false" title="No stroke"></button>
+                    </div>
+                    <label for="selectedStrokeSize">Stroke width</label>
+                    <input id="selectedStrokeSize" type="range" min="0" max="18" value="2">
+                  </div>
+
+                  <div class="selected-style" data-selected-style="common">
+                    <label for="selectedOpacity">Opacity</label>
+                    <input id="selectedOpacity" type="range" min="0" max="100" value="100">
+                    <div class="tool-row selected-tools">
+                      <button id="rotateLeft" type="button" title="Rotate left">Angle -15</button>
+                      <button id="rotateRight" type="button" title="Rotate right">Angle +15</button>
+                      <button id="scaleDown" type="button" title="Scale down">Scale -</button>
+                      <button id="scaleUp" type="button" title="Scale up">Scale +</button>
+                      <button id="duplicateItem" type="button" title="Duplicate">Duplicate</button>
+                      <button id="deleteItem" type="button" title="Delete">Delete</button>
+                    </div>
+                  </div>
+
+                  <div class="selected-style" data-selected-style="image-reset">
+                    <button id="resetImage" class="wide-action" type="button" title="Reset selected image">Reset Image</button>
+                  </div>
+                </div>
+
+                <div class="style-group" data-style-panel="brush">
+                  <label>Brush style</label>
+                  <div class="brush-style-options" role="radiogroup" aria-label="Brush style">
+                    <button class="active" type="button" data-brush-style="pen">Hard pen</button>
+                    <button type="button" data-brush-style="marker">Marker</button>
+                    <button type="button" data-brush-style="watercolor">Watercolor</button>
+                    <button type="button" data-brush-style="oil">Oil paint</button>
+                  </div>
+                  <label for="brushColor">Brush color</label>
+                  <input id="brushColor" type="color" value="#111111">
+                  <label for="brushSize">Brush size</label>
+                  <input id="brushSize" type="range" min="2" max="48" value="12">
+                </div>
+
+                <div class="style-group" data-style-panel="frame">
+                  <label for="strokeColor">Stroke color</label>
+                  <input id="strokeColor" type="color" value="#f06a22">
+                  <label for="strokeSize">Stroke width</label>
+                  <input id="strokeSize" type="range" min="1" max="18" value="4">
+                </div>
+                </div>
+
+              </aside>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="libraryModal" class="library-modal" hidden role="dialog" aria-modal="true" aria-labelledby="libraryModalTitle">
+      <div class="library-dialog">
+        <div class="library-modal-head">
+          <div class="panel-title">
+            <span id="libraryModalTitle">Material Library</span>
+            <small id="librarySubtitle">trademark / washing label assets</small>
+          </div>
+          <button id="closeLibrary" type="button">Close</button>
+        </div>
+        <div class="library-controls" aria-label="Material search">
+          <label for="librarySearch">Search</label>
+          <input id="librarySearch" type="search" placeholder="name / tag / file">
+        </div>
+        <div class="library-tabs" role="tablist" aria-label="Material categories">
+          <button class="library-tab active" type="button" data-library-tab="labels">Labels / Care Tags</button>
+          <button class="library-tab" type="button" data-library-tab="papers">Paper Backgrounds</button>
+          <button class="library-tab" type="button" data-library-tab="decorations">Decorations</button>
+        </div>
+        <p class="hint"><span id="libraryCount">0 materials</span> · Folder: <code id="libraryFolderHint">assets/material-library/labels</code></p>
+        <div id="materialLibrary" class="material-library library-modal-grid" aria-label="Available material assets"></div>
+      </div>
+    </div>
+
+    <script src="app.js?v=manifest-update-77"></script>
+  </body>
+</html>

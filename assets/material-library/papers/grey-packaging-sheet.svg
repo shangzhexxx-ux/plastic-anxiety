@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1440" viewBox="0 0 1080 1440">
+  <rect width="1080" height="1440" fill="#f1f0eb"/>
+  <filter id="paperNoise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="19"/>
+    <feComponentTransfer>
+      <feFuncA type="table" tableValues="0 0.2"/>
+    </feComponentTransfer>
+  </filter>
+  <rect width="1080" height="1440" filter="url(#paperNoise)" opacity="0.85"/>
+  <rect x="74" y="86" width="932" height="1268" fill="none" stroke="#aaa79d" stroke-width="4" opacity="0.68"/>
+  <path d="M76 414 H1002 M76 768 H1002 M76 1122 H1002" stroke="#cbc7bc" stroke-width="10" opacity="0.62"/>
+  <path d="M312 88 V1354 M704 88 V1354" stroke="#bdb8ad" stroke-width="6" opacity="0.58"/>
+</svg>

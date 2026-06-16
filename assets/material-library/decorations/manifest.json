@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Black Tape Strip",
+    "file": "black-tape-strip.svg",
+    "tags": ["tape", "strip", "frame"]
+  },
+  {
+    "name": "Orange Crop Mark",
+    "file": "orange-crop-mark.svg",
+    "tags": ["crop", "mark", "print"]
+  },
+  {
+    "name": "Plastic Warning Ring",
+    "file": "plastic-warning-ring.svg",
+    "tags": ["warning", "ring", "symbol"]
+  },
+  {
+    "name": "Masking Tape 1",
+    "file": "masking tape1.jpg",
+    "tags": ["tape", "masking", "frame"]
+  },
+  {
+    "name": "Masking Tape 2",
+    "file": "masking tape2.jpg",
+    "tags": ["tape", "masking", "frame"]
+  }
+]

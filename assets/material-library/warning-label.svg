@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="140" viewBox="0 0 420 140">
+  <rect width="420" height="140" fill="#f06a22"/>
+  <rect x="8" y="8" width="404" height="124" fill="none" stroke="#111" stroke-width="3"/>
+  <text x="28" y="82" font-family="Arial, sans-serif" font-size="54" font-weight="900">DANGER</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="260" viewBox="0 0 260 260">
+  <circle cx="130" cy="130" r="96" fill="none" stroke="#111" stroke-width="10" stroke-dasharray="20 14"/>
+  <circle cx="130" cy="130" r="64" fill="none" stroke="#f06a22" stroke-width="6"/>
+  <text x="130" y="124" font-family="Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="900" text-anchor="middle">PLASTIC</text>
+  <text x="130" y="154" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="900" text-anchor="middle">ANXIETY</text>
+</svg>

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Care Label",
+    "file": "care-label.svg"
+  },
+  {
+    "name": "Barcode Tag",
+    "file": "barcode-tag.svg"
+  },
+  {
+    "name": "Warning Label",
+    "file": "warning-label.svg"
+  }
+]

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="180" viewBox="0 0 480 180">
+  <rect width="480" height="180" fill="#fff"/>
+  <rect x="8" y="8" width="464" height="164" fill="none" stroke="#111" stroke-width="3"/>
+  <text x="28" y="50" font-family="Arial, sans-serif" font-size="28" font-weight="700">CARE LABEL</text>
+  <text x="28" y="92" font-family="Arial, sans-serif" font-size="24" font-weight="700">100% POLYESTER</text>
+  <text x="28" y="128" font-family="Arial, sans-serif" font-size="18">DO NOT BLEACH / DO NOT TUMBLE DRY</text>
+  <text x="28" y="154" font-family="Arial, sans-serif" font-size="18">MADE FROM SYNTHETIC FIBERS</text>
+</svg>

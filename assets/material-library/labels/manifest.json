@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Care Label",
+    "file": "care-label.svg",
+    "tags": ["washing label", "care", "instruction"]
+  },
+  {
+    "name": "Barcode Tag",
+    "file": "barcode-tag.svg",
+    "tags": ["barcode", "tag", "retail"]
+  },
+  {
+    "name": "Warning Label",
+    "file": "warning-label.svg",
+    "tags": ["warning", "label", "caution"]
+  },
+  {
+    "name": "CHANEL",
+    "file": "CHANEL.jpg",
+    "tags": ["trademark", "luxury", "label", "brand"]
+  },
+  {
+    "name": "DIOR",
+    "file": "DIOR.jpg",
+    "tags": ["trademark", "luxury", "label", "brand"]
+  },
+  {
+    "name": "GUESS",
+    "file": "GUESS.jpg",
+    "tags": ["trademark", "fashion", "label", "brand"]
+  },
+  {
+    "name": "HERMES",
+    "file": "HERMES.jpg",
+    "tags": ["trademark", "luxury", "label", "brand"]
+  },
+  {
+    "name": "LOUIS VUITTON",
+    "file": "LOUIS VUITTON.jpg",
+    "tags": ["trademark", "luxury", "label", "brand"]
+  },
+  {
+    "name": "PLAY",
+    "file": "PLAY.jpg",
+    "tags": ["trademark", "fashion", "label", "brand"]
+  },
+  {
+    "name": "SYMBOL",
+    "file": "SYMBOL.jpg",
+    "tags": ["symbol", "trademark", "label", "brand"]
+  },
+  {
+    "name": "Barcode Sample",
+    "file": "barcode.jpg",
+    "tags": ["barcode", "sample", "label"]
+  },
+  {
+    "name": "Superme Tag",
+    "file": "superme.jpg",
+    "tags": ["trademark", "fashion", "label", "brand"]
+  }
+]
