@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Plastic Anxiety | Collage Lab</title>
     <link rel="stylesheet" href="styles.css?v=android-scroll-fix-79">
-    <link rel="stylesheet" href="android-scroll-fix.css?v=1">
+    <link rel="stylesheet" href="android-scroll-fix.css?v=9">
   </head>
   <body class="lab-body">
     <main class="lab-page">
@@ -16,8 +16,8 @@
             <button class="tool-button active" type="button" data-tool="select" title="Select">Select</button>
             <button id="addText" type="button" title="Add text fragment">Text</button>
             <button class="tool-button" type="button" data-tool="brush" title="Brush">Brush</button>
-            <button class="tool-button" type="button" data-tool="frame" title="Draw frame">Frame</button>
-            <button id="snapshotState" type="button" title="Save snapshot">Snapshot</button>
+            <button class="tool-button" type="button" data-tool="frame" title="Draw frame" hidden>Frame</button>
+            <button id="snapshotState" type="button" title="Save snapshot" hidden>Snapshot</button>
             <button id="undoAction" type="button" title="Undo">Undo</button>
             <button id="redoAction" type="button" title="Redo">Redo</button>
           </div>
@@ -29,6 +29,7 @@
           <button class="panel-tab" type="button" role="tab" data-tab="style" aria-selected="false">Style</button>
           <button class="panel-tab" type="button" role="tab" data-tab="layers" aria-selected="false">Layers</button>
         </div>
+        <button class="mobile-panel-backdrop" type="button" aria-label="Close panel" hidden></button>
 
         <div class="studio-shell">
           <aside class="panel material-panel active-tab" aria-label="Material source panel" data-side-panel="material" data-tab-mode="material">
@@ -184,5 +185,6 @@
     </div>
 
     <script src="app.js?v=manifest-update-77"></script>
+    <script src="mobile-lab.js?v=5"></script>
   </body>
 </html>
