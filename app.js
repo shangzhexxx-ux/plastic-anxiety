@@ -41,6 +41,8 @@ const freeCutImage = document.querySelector("#freeCutImage");
 const applyCropImage = document.querySelector("#applyCropImage");
 const cancelCropImage = document.querySelector("#cancelCropImage");
 const resetImage = document.querySelector("#resetImage");
+const removeImageBackground = document.querySelector("#removeImageBackground");
+const backgroundRemovalStatus = document.querySelector("#backgroundRemovalStatus");
 
 const BW = board.width;
 const BH = board.height;
@@ -177,7 +179,67 @@ function drawPaper() {
   });
 }
 
+function imageAlphaStrokeCanvas(item) {
+  const color = item.strokeColor || "#111111";
+  const cached = item.alphaStrokeCache;
+  if (cached?.image === item.img && cached.color === color) return cached.canvas;
+
+  const dimensions = imageDimensions(item.img);
+  if (!dimensions.width || !dimensions.height) return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = dimensions.width;
+  canvas.height = dimensions.height;
+  const maskContext = canvas.getContext("2d");
+  maskContext.drawImage(item.img, 0, 0, dimensions.width, dimensions.height);
+  maskContext.globalCompositeOperation = "source-in";
+  maskContext.fillStyle = color;
+  maskContext.fillRect(0, 0, dimensions.width, dimensions.height);
+  item.alphaStrokeCache = { image: item.img, color, canvas };
+  return canvas;
+}
+
+function drawImageAlphaStroke(item) {
+  if (!item.backgroundRemoved || !item.outline || (item.strokeWidth ?? 0) <= 0) return;
+  const mask = imageAlphaStrokeCanvas(item);
+  if (!mask) return;
+  const radius = Math.max(1, (item.strokeWidth ?? 0) / 2);
+  const steps = Math.max(16, Math.ceil(radius * 6));
+
+  for (let index = 0; index < steps; index += 1) {
+    const angle = (index / steps) * Math.PI * 2;
+    const offsetX = Math.cos(angle) * radius;
+    const offsetY = Math.sin(angle) * radius;
+    ctx.drawImage(
+      mask,
+      item.sx,
+      item.sy,
+      item.sw,
+      item.sh,
+      -item.w / 2 + offsetX,
+      -item.h / 2 + offsetY,
+      item.w,
+      item.h,
+    );
+  }
+}
+
 function drawImageItem(item) {
+  if (item.backgroundRemoved && item.id === selectedId) {
+    const tile = Math.max(12, Math.min(28, item.w / 10));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(-item.w / 2, -item.h / 2, item.w, item.h);
+    ctx.clip();
+    for (let y = -item.h / 2; y < item.h / 2; y += tile) {
+      for (let x = -item.w / 2; x < item.w / 2; x += tile) {
+        const column = Math.floor((x + item.w / 2) / tile);
+        const row = Math.floor((y + item.h / 2) / tile);
+        ctx.fillStyle = (column + row) % 2 === 0 ? "#ffffff" : "#d8d7d0";
+        ctx.fillRect(x, y, tile, tile);
+      }
+    }
+    ctx.restore();
+  }
   ctx.save();
   ctx.beginPath();
   if (item.mask?.length) {
@@ -190,6 +252,7 @@ function drawImageItem(item) {
     ctx.closePath();
     ctx.clip();
   }
+  drawImageAlphaStroke(item);
   ctx.drawImage(item.img, item.sx, item.sy, item.sw, item.sh, -item.w / 2, -item.h / 2, item.w, item.h);
   ctx.restore();
 }
@@ -199,7 +262,7 @@ function cropInfo(item) {
 }
 
 function originalImageSource(item) {
-  return item.original || {
+  return item.processedSource || item.original || {
     sx: item.sx,
     sy: item.sy,
     sw: item.sw,
@@ -403,7 +466,9 @@ function drawObjectItem(item) {
   if (item.outline && (item.strokeWidth ?? 2) > 0 && !(imageCutMode && item.type === "image")) {
     ctx.strokeStyle = item.strokeColor || "#111";
     ctx.lineWidth = item.strokeWidth ?? 2;
-    if (!(item.type === "image" && drawImageMaskStroke(item))) {
+    if (item.type === "image" && item.backgroundRemoved) {
+      // Transparent image outlines are rendered from the remaining alpha pixels.
+    } else if (!(item.type === "image" && drawImageMaskStroke(item))) {
       ctx.strokeRect(-item.w / 2, -item.h / 2, item.w, item.h);
     }
   }
@@ -436,6 +501,8 @@ function cloneItem(item) {
     mask: item.mask ? item.mask.map((point) => ({ ...point })) : undefined,
     crop: item.crop ? { ...item.crop } : undefined,
     original: item.original ? { ...item.original, mask: item.original.mask ? item.original.mask.map((point) => ({ ...point })) : undefined } : undefined,
+    processedSource: item.processedSource ? { ...item.processedSource } : undefined,
+    backgroundRemoved: item.backgroundRemoved,
   };
 }
 
@@ -651,6 +718,12 @@ function syncAllRangeProgress() {
 function syncSelectedControls() {
   const selected = getSelected();
   setSelectedStyleVisibility(selected);
+  if (backgroundRemovalStatus) {
+    backgroundRemovalStatus.textContent =
+      selected?.type === "image" && selected.backgroundRemoved
+        ? "Background is transparent. Checkerboard is preview only."
+        : "";
+  }
   if (!selected) {
     if (styleContext && activeTool === "select") styleContext.textContent = "select";
     return;
@@ -849,6 +922,7 @@ function addManifestAssets(assets, tabName, tab) {
 function storeOriginalImageState(item) {
   item.crop = item.crop || { x: 0, y: 0, w: 1, h: 1 };
   item.original = {
+    img: item.img,
     sx: item.sx,
     sy: item.sy,
     sw: item.sw,
@@ -863,6 +937,222 @@ function storeOriginalImageState(item) {
     crop: { ...item.crop },
   };
   return item;
+}
+
+function imageDimensions(image) {
+  return {
+    width: image.naturalWidth || image.videoWidth || image.width,
+    height: image.naturalHeight || image.videoHeight || image.height,
+  };
+}
+
+function detectEdgeBackgroundColor(pixels, width, height) {
+  const buckets = new Map();
+  const band = Math.max(2, Math.min(24, Math.round(Math.min(width, height) * 0.04)));
+  const step = Math.max(1, Math.floor(Math.min(width, height) / 320));
+
+  function sample(x, y) {
+    const offset = (y * width + x) * 4;
+    if (pixels[offset + 3] <= 8) return;
+    const red = pixels[offset];
+    const green = pixels[offset + 1];
+    const blue = pixels[offset + 2];
+    const key = `${red >> 4}-${green >> 4}-${blue >> 4}`;
+    const bucket = buckets.get(key) || { count: 0, red: 0, green: 0, blue: 0 };
+    bucket.count += 1;
+    bucket.red += red;
+    bucket.green += green;
+    bucket.blue += blue;
+    buckets.set(key, bucket);
+  }
+
+  for (let y = 0; y < height; y += step) {
+    for (let x = 0; x < band; x += step) sample(x, y);
+    for (let x = Math.max(band, width - band); x < width; x += step) sample(x, y);
+  }
+  for (let x = band; x < width - band; x += step) {
+    for (let y = 0; y < band; y += step) sample(x, y);
+    for (let y = Math.max(band, height - band); y < height; y += step) sample(x, y);
+  }
+
+  const dominant = [...buckets.values()].sort((a, b) => b.count - a.count)[0];
+  if (!dominant) return null;
+  return {
+    red: Math.round(dominant.red / dominant.count),
+    green: Math.round(dominant.green / dominant.count),
+    blue: Math.round(dominant.blue / dominant.count),
+  };
+}
+
+function trimImageToOpaqueBounds(item, pixels, imageWidth, imageHeight) {
+  const sourceX = Math.max(0, Math.floor(item.sx));
+  const sourceY = Math.max(0, Math.floor(item.sy));
+  const sourceRight = Math.min(imageWidth, Math.ceil(item.sx + item.sw));
+  const sourceBottom = Math.min(imageHeight, Math.ceil(item.sy + item.sh));
+  let minX = sourceRight;
+  let minY = sourceBottom;
+  let maxX = sourceX - 1;
+  let maxY = sourceY - 1;
+
+  for (let y = sourceY; y < sourceBottom; y += 1) {
+    for (let x = sourceX; x < sourceRight; x += 1) {
+      if (pixels[(y * imageWidth + x) * 4 + 3] <= 8) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (maxX < minX || maxY < minY) return false;
+
+  const padding = 1;
+  minX = Math.max(sourceX, minX - padding);
+  minY = Math.max(sourceY, minY - padding);
+  maxX = Math.min(sourceRight - 1, maxX + padding);
+  maxY = Math.min(sourceBottom - 1, maxY + padding);
+
+  const oldSx = item.sx;
+  const oldSy = item.sy;
+  const oldSw = item.sw;
+  const oldSh = item.sh;
+  const oldW = item.w;
+  const oldH = item.h;
+  const nextSw = maxX - minX + 1;
+  const nextSh = maxY - minY + 1;
+  const relativeX = (minX - oldSx) / oldSw;
+  const relativeY = (minY - oldSy) / oldSh;
+  const relativeW = nextSw / oldSw;
+  const relativeH = nextSh / oldSh;
+  const localCenterX = (relativeX + relativeW / 2 - 0.5) * oldW;
+  const localCenterY = (relativeY + relativeH / 2 - 0.5) * oldH;
+  const cosine = Math.cos(item.rotation || 0);
+  const sine = Math.sin(item.rotation || 0);
+
+  item.x += localCenterX * cosine - localCenterY * sine;
+  item.y += localCenterX * sine + localCenterY * cosine;
+  item.sx = minX;
+  item.sy = minY;
+  item.sw = nextSw;
+  item.sh = nextSh;
+  item.w = Math.max(1, oldW * relativeW);
+  item.h = Math.max(1, oldH * relativeH);
+  item.crop = { x: 0, y: 0, w: 1, h: 1 };
+
+  if (item.mask?.length) {
+    item.mask = item.mask.map((point) => ({
+      x: clamp((point.x - relativeX) / relativeW, 0, 1),
+      y: clamp((point.y - relativeY) / relativeH, 0, 1),
+    }));
+  }
+
+  return true;
+}
+
+function removeConnectedBackgroundColor(item, tolerance) {
+  const dimensions = imageDimensions(item.img);
+  if (!dimensions.width || !dimensions.height) return false;
+
+  const maxDimension = 1800;
+  const scale = Math.min(1, maxDimension / Math.max(dimensions.width, dimensions.height));
+  const width = Math.max(1, Math.round(dimensions.width * scale));
+  const height = Math.max(1, Math.round(dimensions.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const imageContext = canvas.getContext("2d", { willReadFrequently: true });
+  imageContext.drawImage(item.img, 0, 0, width, height);
+
+  let imageData;
+  try {
+    imageData = imageContext.getImageData(0, 0, width, height);
+  } catch {
+    return false;
+  }
+
+  const pixels = imageData.data;
+  const target = detectEdgeBackgroundColor(pixels, width, height);
+  if (!target) return false;
+  const pixelCount = width * height;
+  const visited = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let head = 0;
+  let tail = 0;
+  let removedPixels = 0;
+  const distanceLimit = tolerance * 2.2;
+  const distanceLimitSquared = distanceLimit * distanceLimit;
+
+  function isBackground(index) {
+    const offset = index * 4;
+    if (pixels[offset + 3] === 0) return true;
+    const redDistance = target.red - pixels[offset];
+    const greenDistance = target.green - pixels[offset + 1];
+    const blueDistance = target.blue - pixels[offset + 2];
+    return (
+      redDistance * redDistance +
+      greenDistance * greenDistance +
+      blueDistance * blueDistance
+    ) <= distanceLimitSquared;
+  }
+
+  function enqueue(index) {
+    if (visited[index] || !isBackground(index)) return;
+    visited[index] = 1;
+    queue[tail] = index;
+    tail += 1;
+  }
+
+  for (let x = 0; x < width; x += 1) {
+    enqueue(x);
+    enqueue((height - 1) * width + x);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    enqueue(y * width);
+    enqueue(y * width + width - 1);
+  }
+
+  while (head < tail) {
+    const index = queue[head];
+    head += 1;
+    const x = index % width;
+    const y = Math.floor(index / width);
+    pixels[index * 4 + 3] = 0;
+    removedPixels += 1;
+    if (x > 0) enqueue(index - 1);
+    if (x < width - 1) enqueue(index + 1);
+    if (y > 0) enqueue(index - width);
+    if (y < height - 1) enqueue(index + width);
+  }
+
+  imageContext.putImageData(imageData, 0, 0);
+  const sourceScaleX = width / dimensions.width;
+  const sourceScaleY = height / dimensions.height;
+  item.img = canvas;
+  item.sx *= sourceScaleX;
+  item.sy *= sourceScaleY;
+  item.sw *= sourceScaleX;
+  item.sh *= sourceScaleY;
+  const didTrim = trimImageToOpaqueBounds(item, pixels, width, height);
+  item.processedSource = {
+    img: canvas,
+    sx: item.sx,
+    sy: item.sy,
+    sw: item.sw,
+    sh: item.sh,
+    w: item.w,
+    h: item.h,
+  };
+  item.backgroundRemoved = removedPixels > 0;
+  item.alphaStrokeCache = undefined;
+  return {
+    success: removedPixels > 0,
+    removedPixels,
+    totalPixels: pixelCount,
+    didTrim,
+    detectedColor: `#${[target.red, target.green, target.blue]
+      .map((value) => value.toString(16).padStart(2, "0"))
+      .join("")}`,
+  };
 }
 
 function loadMaterialLibrary() {
@@ -1180,6 +1470,11 @@ function resetSelectedImage() {
   selected.outline = selected.original.outline;
   selected.strokeColor = selected.original.strokeColor || selected.strokeColor;
   selected.strokeWidth = selected.original.strokeWidth ?? selected.strokeWidth;
+  selected.img = selected.original.img || selected.img;
+  selected.processedSource = undefined;
+  selected.backgroundRemoved = false;
+  selected.alphaStrokeCache = undefined;
+  if (backgroundRemovalStatus) backgroundRemovalStatus.textContent = "";
   clearImageCut();
   syncSelectedControls();
   draw();
@@ -1825,6 +2120,40 @@ document.querySelector("#scaleUp").addEventListener("click", () => transformSele
 
 cropImage?.addEventListener("click", () => startImageCut("crop"));
 freeCutImage?.addEventListener("click", () => startImageCut("free"));
+removeImageBackground?.addEventListener("click", () => {
+  const selected = getSelected();
+  if (!selected || selected.type !== "image") return;
+  const previousLabel = removeImageBackground.textContent;
+  removeImageBackground.disabled = true;
+  removeImageBackground.textContent = "Processing...";
+  if (backgroundRemovalStatus) {
+    backgroundRemovalStatus.textContent = "Detecting the dominant edge color...";
+  }
+  window.setTimeout(() => {
+    const result = removeConnectedBackgroundColor(
+      selected,
+      34,
+    );
+    removeImageBackground.disabled = false;
+    removeImageBackground.textContent = previousLabel;
+    if (!result?.success) {
+      if (backgroundRemovalStatus) {
+        backgroundRemovalStatus.textContent = "No removable edge background was found. Increase tolerance and try again.";
+      }
+      return;
+    }
+    clearImageCut();
+    syncSelectedControls();
+    draw();
+    commitHistory();
+    if (backgroundRemovalStatus) {
+      const percentage = Math.round((result.removedPixels / result.totalPixels) * 100);
+      backgroundRemovalStatus.textContent = result.didTrim
+        ? `Detected ${result.detectedColor.toUpperCase()}. Removed ${percentage}% and fitted the element to the subject.`
+        : `Detected ${result.detectedColor.toUpperCase()}. Removed ${percentage}% of the background.`;
+    }
+  }, 30);
+});
 resetImage?.addEventListener("click", resetSelectedImage);
 applyCropImage?.addEventListener("click", () => {
   if (imageCutMode !== "crop" || !imageCutState) return;
