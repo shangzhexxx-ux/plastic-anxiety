@@ -882,14 +882,24 @@ function openLibraryModal() {
   libraryModal.hidden = false;
   document.body.classList.add("library-open");
   renderMaterialLibrary();
-  librarySearch?.focus();
+  if (!window.matchMedia("(max-width: 768px)").matches) librarySearch?.focus();
 }
 
 function closeLibraryModal() {
   if (!libraryModal) return;
   libraryModal.hidden = true;
   document.body.classList.remove("library-open");
-  openLibrary?.focus();
+  if (window.matchMedia("(max-width: 768px)").matches) {
+    document.activeElement?.blur();
+  } else {
+    openLibrary?.focus();
+  }
+}
+
+function notifyMaterialPlaced() {
+  if (!window.matchMedia("(max-width: 768px)").matches) return;
+  document.activeElement?.blur();
+  window.dispatchEvent(new CustomEvent("mobile-material-placed"));
 }
 
 function addMaterialAsset(asset, tabName = activeMaterialTab) {
@@ -1182,6 +1192,7 @@ function setBoardBackground(asset) {
     draw();
     renderMaterialLibrary();
     commitHistory();
+    notifyMaterialPlaced();
   };
   img.src = asset.src;
 }
@@ -1211,6 +1222,7 @@ function placeMaterialAsset(asset) {
     setTool("select");
     draw();
     commitHistory();
+    notifyMaterialPlaced();
   };
   img.src = asset.src;
 }

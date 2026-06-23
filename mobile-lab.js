@@ -10,6 +10,7 @@ let mobileOpenPanel = null;
 
 function closeMobilePanel() {
   mobileOpenPanel = null;
+  document.activeElement?.blur();
   document.body.classList.remove(
     "mobile-panel-open",
     "mobile-panel-material",
@@ -104,6 +105,7 @@ document.addEventListener(
 );
 
 mobilePanelBackdrop?.addEventListener("click", closeMobilePanel);
+window.addEventListener("mobile-material-placed", closeMobilePanel);
 
 document.querySelectorAll(".panel-toggle").forEach((button) => {
   button.addEventListener("click", () => {
